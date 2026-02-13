@@ -168,11 +168,12 @@ body::after {
 }
 
 .follow-up-question {
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: #d63384;
     margin: 2rem 0;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     animation: fadeIn 2s ease-in;
+    font-weight: bold;
 }
 
 @keyframes bounce {
