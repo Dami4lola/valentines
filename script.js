@@ -28,7 +28,7 @@ noBtn.addEventListener('click', function(e) {
     yesBtn.style.transform = `scale(${newScale})`;
     
     // If button gets too large, make it cover the screen
-    if (newScale >= 5) {
+    if (newScale >= 150) {
         yesBtn.style.width = '100vw';
         yesBtn.style.height = '100vh';
         yesBtn.style.position = 'fixed';
