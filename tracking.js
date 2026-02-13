@@ -1,12 +1,25 @@
 // Tracking utility for "No" button clicks
 class ClickTracker {
     constructor() {
-        this.sessionId = this.generateSessionId();
+        // Generate session ID first
+        this.sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         this.startTime = new Date().toISOString();
-        this.clicks = {
-            mainPage: 0,
-            successPage: 0
-        };
+        this.clicks = { mainPage: 0, successPage: 0 };
+        
+        // Try to load existing session data from localStorage
+        const savedData = localStorage.getItem('valentine_tracking');
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                // Use saved session data if it exists
+                if (parsed.sessionId) this.sessionId = parsed.sessionId;
+                if (parsed.startTime) this.startTime = parsed.startTime;
+                if (parsed.clicks) this.clicks = parsed.clicks;
+            } catch (e) {
+                console.warn('Failed to parse saved tracking data:', e);
+            }
+        }
+        
         // Initialize EmailJS if available and configured
         if (typeof emailjs !== 'undefined' && typeof CONFIG !== 'undefined') {
             const PUBLIC_KEY = CONFIG.EMAILJS_PUBLIC_KEY;
@@ -25,13 +38,8 @@ class ClickTracker {
         // Track page views
         this.currentPage = this.getPageName();
         
-        // Send data when page is about to unload
-        window.addEventListener('beforeunload', () => {
-            this.sendData();
-        });
-
-        // Also send data when navigating to final pages
-        this.setupNavigationTracking();
+        // Don't send on beforeunload - only send on final pages
+        // Email will be sent when user reaches breakfast.html or plans.html
     }
 
     getPageName() {
@@ -65,23 +73,6 @@ class ClickTracker {
         localStorage.setItem('valentine_tracking', JSON.stringify(data));
     }
 
-    setupNavigationTracking() {
-        // Override navigation to send data before leaving
-        const originalAssign = window.location.assign;
-        const originalReplace = window.location.replace;
-        const originalHref = Object.getOwnPropertyDescriptor(window.location, 'href');
-
-        const self = this;
-        
-        // Track when navigating to final pages
-        document.addEventListener('click', function(e) {
-            if (e.target && (e.target.id === 'yesBtn' || e.target.id === 'yesBtn2')) {
-                setTimeout(() => {
-                    self.sendData();
-                }, 100);
-            }
-        });
-    }
 
     async sendData() {
         const data = {
@@ -94,91 +85,76 @@ class ClickTracker {
             timestamp: new Date().toISOString()
         };
 
-        // Try multiple methods to send data
+        console.log('Sending tracking data:', data);
+
+        // Only use EmailJS
         try {
-            // Method 1: Webhook (configure your webhook URL here)
-            await this.sendToWebhook(data);
-        } catch (error) {
-            console.error('Webhook failed, trying email...', error);
-            try {
-                // Method 2: Email via EmailJS (if configured)
-                await this.sendToEmail(data);
-            } catch (emailError) {
-                console.error('Email failed, saving to console...', emailError);
-                // Method 3: Console log as fallback
-                console.log('Valentine Tracking Data:', data);
-                this.saveToLocalStorage();
-            }
+            console.log('Attempting to send email...');
+            await this.sendToEmail(data);
+            console.log('Email sent successfully!');
+        } catch (emailError) {
+            console.error('Email failed:', emailError);
+            // Fallback to console and localStorage
+            console.log('Valentine Tracking Data:', data);
+            this.saveToLocalStorage();
         }
     }
 
-    async sendToWebhook(data) {
-        // Get webhook URL from config
-        const webhookUrl = (typeof CONFIG !== 'undefined' && CONFIG.WEBHOOK_URL) 
-            ? CONFIG.WEBHOOK_URL 
-            : '';
-        
-        // If webhook URL is not configured, skip
-        if (!webhookUrl || webhookUrl.trim() === '') {
-            throw new Error('Webhook not configured');
-        }
-
-        const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-            keepalive: true // Ensures request completes even if page unloads
-        });
-
-        if (!response.ok) {
-            throw new Error('Webhook request failed');
-        }
-    }
 
     async sendToEmail(data) {
         // EmailJS configuration
         if (typeof emailjs === 'undefined') {
-            throw new Error('EmailJS not loaded');
+            throw new Error('EmailJS not loaded - make sure emailjs script is included');
         }
 
         // Get configuration from config.js
         if (typeof CONFIG === 'undefined') {
-            throw new Error('Config file not loaded');
+            throw new Error('Config file not loaded - make sure config.js is included before tracking.js');
         }
-
-        const emailParams = {
-            to_email: CONFIG.RECIPIENT_EMAIL || 'ayoadedamilola91@gmail.com',
-            subject: 'Valentine Website - No Button Clicks Report',
-            message: `
-Valentine Website Tracking Report
-
-Session ID: ${data.sessionId}
-Start Time: ${data.startTime}
-End Time: ${data.endTime}
-
-Click Statistics:
-- Main Page "No" Clicks: ${data.clicks.mainPage}
-- Success Page "No" Clicks: ${data.clicks.successPage}
-- Total "No" Clicks: ${data.clicks.mainPage + data.clicks.successPage}
-
-Page: ${data.page}
-User Agent: ${data.userAgent}
-            `.trim()
-        };
 
         const PUBLIC_KEY = CONFIG.EMAILJS_PUBLIC_KEY;
         const SERVICE_ID = CONFIG.EMAILJS_SERVICE_ID;
         const TEMPLATE_ID = CONFIG.EMAILJS_TEMPLATE_ID;
 
-        if (!PUBLIC_KEY || PUBLIC_KEY === 'YOUR_PUBLIC_KEY_HERE' || 
-            !SERVICE_ID || SERVICE_ID === 'YOUR_SERVICE_ID_HERE' || 
-            !TEMPLATE_ID || TEMPLATE_ID === 'YOUR_TEMPLATE_ID_HERE') {
-            throw new Error('EmailJS not configured - please set values in config.js');
+        // Validate configuration
+        if (!PUBLIC_KEY || PUBLIC_KEY === 'YOUR_PUBLIC_KEY_HERE') {
+            throw new Error('EmailJS Public Key not configured in config.js');
+        }
+        if (!SERVICE_ID || SERVICE_ID === 'YOUR_SERVICE_ID_HERE') {
+            throw new Error('EmailJS Service ID not configured in config.js');
+        }
+        if (!TEMPLATE_ID || TEMPLATE_ID === 'YOUR_TEMPLATE_ID_HERE') {
+            throw new Error('EmailJS Template ID not configured in config.js');
         }
 
-        await emailjs.send(SERVICE_ID, TEMPLATE_ID, emailParams);
+        // Initialize EmailJS if not already initialized
+        try {
+            emailjs.init(PUBLIC_KEY);
+        } catch (initError) {
+            console.warn('EmailJS already initialized or init failed:', initError);
+        }
+
+        // Format message as requested: "No was pressed X times on page index.html and No was pressed Y times on success.html"
+        const mainPageText = data.clicks.mainPage === 1 ? 'time' : 'times';
+        const successPageText = data.clicks.successPage === 1 ? 'time' : 'times';
+        const message = `No was pressed ${data.clicks.mainPage} ${mainPageText} on page index.html and No was pressed ${data.clicks.successPage} ${successPageText} on success.html`;
+
+        const emailParams = {
+            to_email: CONFIG.RECIPIENT_EMAIL || 'ayoadedamilola91@gmail.com',
+            subject: 'Valentine Website - No Button Clicks Report',
+            message: message
+        };
+
+        console.log('Sending email with params:', { SERVICE_ID, TEMPLATE_ID, to_email: emailParams.to_email });
+
+        try {
+            const response = await emailjs.send(SERVICE_ID, TEMPLATE_ID, emailParams);
+            console.log('EmailJS response:', response);
+            return response;
+        } catch (error) {
+            console.error('EmailJS send error:', error);
+            throw error;
+        }
     }
 }
 

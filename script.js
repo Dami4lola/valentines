@@ -47,9 +47,6 @@ noBtn.addEventListener('click', function(e) {
 
 // Handle "Yes" button click
 yesBtn.addEventListener('click', function() {
-    // Send tracking data before navigating
-    if (window.clickTracker) {
-        window.clickTracker.sendData();
-    }
+    // Don't send email here - only send when reaching final page
     window.location.href = 'success.html';
 });

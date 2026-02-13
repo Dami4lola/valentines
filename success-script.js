@@ -16,10 +16,7 @@ noBtn2.addEventListener('click', function(e) {
     
     // If "No" clicked 3 times, go to breakfast page
     if (noClickCount2 >= maxNoClicks) {
-        // Send tracking data before navigating
-        if (window.clickTracker) {
-            window.clickTracker.sendData();
-        }
+        // Don't send email here - will be sent when breakfast.html loads
         window.location.href = 'breakfast.html';
         return;
     }
@@ -38,9 +35,6 @@ noBtn2.addEventListener('click', function(e) {
 
 // Handle "Yes" button click
 yesBtn2.addEventListener('click', function() {
-    // Send tracking data before navigating
-    if (window.clickTracker) {
-        window.clickTracker.sendData();
-    }
+    // Don't send email here - will be sent when plans.html loads
     window.location.href = 'plans.html';
 });

@@ -11,5 +11,16 @@
         <img src="Dog Hello GIF.gif" alt="Dog hello" class="gif-image">
         <h1 class="success-message">Yaaay i have plans made! 🎉</h1>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="config.js"></script>
+    <script src="tracking.js"></script>
+    <script>
+        // Send email when final page loads
+        window.addEventListener('load', function() {
+            if (window.clickTracker) {
+                window.clickTracker.sendData();
+            }
+        });
+    </script>
 </body>
 </html>
