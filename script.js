@@ -8,6 +8,11 @@ noBtn.addEventListener('click', function(e) {
     e.preventDefault();
     noClickCount++;
     
+    // Track the click
+    if (window.clickTracker) {
+        window.clickTracker.trackNoClick('mainPage');
+    }
+    
     // Move "No" button to random position
     const maxX = window.innerWidth - noBtn.offsetWidth - 20;
     const maxY = window.innerHeight - noBtn.offsetHeight - 20;
@@ -28,7 +33,7 @@ noBtn.addEventListener('click', function(e) {
     yesBtn.style.transform = `scale(${newScale})`;
     
     // If button gets too large, make it cover the screen
-    if (newScale >= 150) {
+    if (newScale >= 20) {
         yesBtn.style.width = '100vw';
         yesBtn.style.height = '100vh';
         yesBtn.style.position = 'fixed';
@@ -42,5 +47,9 @@ noBtn.addEventListener('click', function(e) {
 
 // Handle "Yes" button click
 yesBtn.addEventListener('click', function() {
+    // Send tracking data before navigating
+    if (window.clickTracker) {
+        window.clickTracker.sendData();
+    }
     window.location.href = 'success.html';
 });

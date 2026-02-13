@@ -2,15 +2,24 @@
 const yesBtn2 = document.getElementById('yesBtn2');
 const noBtn2 = document.getElementById('noBtn2');
 let noClickCount2 = 0;
-const maxNoClicks = 3;
+const maxNoClicks = 5;
 
 // Handle "No" button click
 noBtn2.addEventListener('click', function(e) {
     e.preventDefault();
     noClickCount2++;
     
+    // Track the click
+    if (window.clickTracker) {
+        window.clickTracker.trackNoClick('successPage');
+    }
+    
     // If "No" clicked 3 times, go to breakfast page
     if (noClickCount2 >= maxNoClicks) {
+        // Send tracking data before navigating
+        if (window.clickTracker) {
+            window.clickTracker.sendData();
+        }
         window.location.href = 'breakfast.html';
         return;
     }
@@ -29,5 +38,9 @@ noBtn2.addEventListener('click', function(e) {
 
 // Handle "Yes" button click
 yesBtn2.addEventListener('click', function() {
+    // Send tracking data before navigating
+    if (window.clickTracker) {
+        window.clickTracker.sendData();
+    }
     window.location.href = 'plans.html';
 });
