@@ -1,0 +1,11 @@
+{
+  "name": "valentines",
+  "version": "1.0.0",
+  "description": "Valentine's Day Website",
+  "scripts": {
+    "build": "node build-config.js"
+  },
+  "engines": {
+    "node": ">=14.x"
+  }
+}

@@ -1,4 +1,6 @@
 # Configuration file with sensitive data
+# config.js is generated from environment variables during Vercel build
+# Keep it gitignored - it will be generated at build time
 config.js
 
 # Environment files
