@@ -13,14 +13,43 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script src="config.js"></script>
-    <script src="tracking.js"></script>
     <script>
-        // Send email when final page loads
+        // Wait for config.js to load, then load tracking.js
         window.addEventListener('load', function() {
-            if (window.clickTracker) {
-                window.clickTracker.sendData();
+            // Ensure CONFIG is loaded
+            if (typeof CONFIG === 'undefined') {
+                console.error('CONFIG not loaded, retrying...');
+                setTimeout(function() {
+                    if (typeof CONFIG !== 'undefined') {
+                        loadTrackingAndSend();
+                    } else {
+                        console.error('CONFIG still not loaded');
+                    }
+                }, 100);
+            } else {
+                loadTrackingAndSend();
             }
         });
+
+        function loadTrackingAndSend() {
+            // Dynamically load tracking.js
+            const script = document.createElement('script');
+            script.src = 'tracking.js';
+            script.onload = function() {
+                // Wait a bit for tracker to initialize
+                setTimeout(function() {
+                    if (window.clickTracker) {
+                        window.clickTracker.sendData();
+                    } else {
+                        console.error('clickTracker not available');
+                    }
+                }, 100);
+            };
+            script.onerror = function() {
+                console.error('Failed to load tracking.js');
+            };
+            document.body.appendChild(script);
+        }
     </script>
 </body>
 </html>
