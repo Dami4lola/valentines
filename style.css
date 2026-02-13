@@ -10,9 +10,11 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
-    overflow: hidden;
+    align-items: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
+    padding: 1rem;
 }
 
 body::before {
@@ -49,10 +51,10 @@ body::after {
 }
 
 .gif-image {
-    max-width: 300px;
+    max-width: min(300px, 80vw);
     width: 100%;
     height: auto;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     border-radius: 20px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
@@ -123,24 +125,28 @@ body::after {
 /* Success page styles */
 .success-container {
     text-align: center;
-    padding: 2rem;
+    padding: 1rem;
     max-width: 800px;
     margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .success-message {
-    font-size: 3rem;
+    font-size: clamp(1.5rem, 5vw, 3rem);
     color: #d63384;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     animation: fadeIn 1s ease-in;
+    line-height: 1.2;
 }
 
 .success-subtitle {
-    font-size: 1.5rem;
+    font-size: clamp(1rem, 3vw, 1.5rem);
     color: #c44569;
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
     animation: fadeIn 1.5s ease-in;
+    line-height: 1.3;
 }
 
 @keyframes fadeIn {
@@ -155,24 +161,25 @@ body::after {
 }
 
 .hearts {
-    font-size: 4rem;
-    margin: 2rem 0;
+    font-size: clamp(2rem, 6vw, 4rem);
+    margin: 1rem 0;
     animation: bounce 1s ease-in-out infinite;
 }
 
 .follow-up-section {
-    margin-top: 4rem;
-    padding-top: 3rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
     border-top: 2px solid rgba(214, 51, 132, 0.3);
 }
 
 .follow-up-question {
-    font-size: 2.5rem;
+    font-size: clamp(1.2rem, 4vw, 2.5rem);
     color: #d63384;
-    margin: 2rem 0;
+    margin: 1rem 0;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     animation: fadeIn 2s ease-in;
     font-weight: bold;
+    line-height: 1.3;
 }
 
 @keyframes bounce {
@@ -186,21 +193,57 @@ body::after {
 
 /* Responsive design */
 @media (max-width: 768px) {
+    body {
+        padding: 0.5rem;
+    }
+    
     .question {
-        font-size: 2rem;
-        margin-bottom: 2rem;
+        font-size: clamp(1.5rem, 6vw, 2rem);
+        margin-bottom: 1.5rem;
     }
     
     .btn {
-        padding: 0.8rem 2rem;
-        font-size: 1.2rem;
+        padding: 0.8rem 1.5rem;
+        font-size: clamp(1rem, 3vw, 1.2rem);
+    }
+    
+    .success-container {
+        padding: 0.5rem;
+    }
+    
+    .hearts {
+        margin: 0.5rem 0;
+    }
+    
+    .follow-up-section {
+        margin-top: 1rem;
+        padding-top: 1rem;
+    }
+    
+    .buttons-container {
+        min-height: 60px;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .success-container {
+        padding: 0.5rem;
     }
     
     .success-message {
-        font-size: 2rem;
+        margin-bottom: 0.5rem;
     }
     
     .success-subtitle {
-        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .follow-up-question {
+        margin: 0.5rem 0;
+    }
+    
+    .gif-image {
+        margin-bottom: 0.5rem;
     }
 }
